@@ -97,7 +97,7 @@ class BlankCheckerController {
         this.blankChecker = blankChecker;
         this.blankChecker.addBlankLineIfNeeded();
 
-        // subscribe to selection change and editor activation events
+        // subscribe to selection change and editor activation events.
         let subscriptions: Disposable[] = [];
         workspace.onDidSaveTextDocument(this._onEvent, this, subscriptions);
 
