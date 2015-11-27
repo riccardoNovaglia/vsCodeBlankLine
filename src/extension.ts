@@ -13,8 +13,9 @@ export function activate(context: ExtensionContext) {
     // This line of code will only be executed once when your extension is activated.
     // console.log('Congratulations, your extension "BlankLineChecker" is now active!');
 
-    // create a new object which will verify that the last line is blank, and will add one if needed
+    // reate a new object which will verify that the last line is blank, and will add one if neededCcreate a new object which will verify that the last line is blank, and will add one if needed
     let blankLineChecker = new BlankLineChecker();
+    // controller
     let controller = new BlankCheckerController(blankLineChecker);
 
     var disposable = commands.registerCommand('extension.checkBlankLine', () => {
@@ -58,7 +59,6 @@ class BlankLineChecker {
             if (this.skipOne) {
                 this.skipOne = false;
             }
-            console.log('ok...');
         }
     }
 
@@ -91,25 +91,19 @@ class BlankLineChecker {
 class BlankCheckerController {
 
     private blankChecker: BlankLineChecker;
-    private _disposable: Disposable;
 
     constructor(blankChecker: BlankLineChecker) {
         this.blankChecker = blankChecker;
-        this.blankChecker.addBlankLineIfNeeded();
 
-        // subscribe to selection change and editor activation events.
+        // subscribe to trigger when the file is saved
         let subscriptions: Disposable[] = [];
         workspace.onDidSaveTextDocument(this._onEvent, this, subscriptions);
 
-        // update the counter for the current file
-        this.blankChecker.addBlankLineIfNeeded();
-
         // create a combined disposable from both event subscriptions
-        this._disposable = Disposable.from(...subscriptions);
     }
 
     dispose() {
-        this._disposable.dispose();
+
     }
 
     private _onEvent() {
