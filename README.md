@@ -1,13 +1,8 @@
-# README
-## This is the README for your extension "missinglineendoffile" 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+# A Blank line at the end of the file!
+## Don't you hate it when git complains there's no blank line at the end of a file? Me too!!
 
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
+Whenever you save a file this extension will automatically add the blank line if needed, not otherwise. A message box will alert you, you can dismiss it with the "Close" button or just hit Esc.
 
-### For more information
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+If you didn't want the line, you can hit "Revert!" and it will remove it for you and re-save the file un-blank-lined!
 
-** Enjoy!**
+If this is bugging you because this one file should have a line at the end, just hit "Stop that!". It will stop that. From happening

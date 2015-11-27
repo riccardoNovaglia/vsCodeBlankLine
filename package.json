@@ -1,32 +1,38 @@
 {
-	"name": "missinglineendoffile",
-	"displayName": "missingLineEndOfFile",
-	"description": "This extension will add a blank line at the end of your files when you save them!",
-	"version": "0.0.1",
-	"publisher": "NovagliaRiccardo",
-	"engines": {
-		"vscode": "^0.10.1"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.checkBlankLine",
+    "name": "missinglineendoffile",
+    "displayName": "Blank Line at the End of File",
+    "description": "This extension will add a blank line at the end of your files when you save them!",
+    "version": "0.0.4",
+    "publisher": "riccardoNovaglia",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/riccardoNovaglia/vsCodeBlankLine.git"
+    },
+    "engines": {
+        "vscode": "^0.10.1"
+    },
+    "categories": [
+        "Linters"
+    ],
+    "activationEvents": [
+        "onCommand:extension.checkBlankLine",
         "onCommand:workbench.action.files.save"
-	],
-	"main": "./out/src/extension",
-	"contributes": {
-		"commands": [{
-			"command": "extension.checkBlankLine",
-			"title": "Check for Blank line at End of File"
-		}]
-	},
-	"scripts": {
-		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
-	},
-	"devDependencies": {
-		"typescript": "^1.6.2",
-		"vscode": "0.10.x"
-	}
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.checkBlankLine",
+                "title": "Check for Blank line at End of File"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+    },
+    "devDependencies": {
+        "typescript": "^1.6.2",
+        "vscode": "0.10.x"
+    }
 }
