@@ -44,6 +44,9 @@ class BlankLineChecker {
             if (doc.lineCount > 1 && lastLineText !== '') {
                 editor.edit(function(editbuilder) {
                     editbuilder.insert(new Position(doc.lineCount, lastLineText.length), EOL);
+                    setTimeout(function() {
+                        doc.save();
+                    }, 200);
                     var revertButton = 'Revert!';
                     var stopThat = 'Stop that!';
                     window.showInformationMessage('A blank line has been added at the end of your file!', revertButton, stopThat).then(value => {
