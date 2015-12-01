@@ -16,7 +16,7 @@
         "vscode": "^0.10.1"
     },
     "categories": [
-        "Linters", "Others"
+        "Linters", "Other"
     ],
     "activationEvents": [
         "onCommand:extension.checkBlankLine",
