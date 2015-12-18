@@ -47,15 +47,18 @@ class BlankLineChecker {
                     setTimeout(function() {
                         doc.save();
                     }, 200);
-                    var revertButton = 'Revert!';
-                    var stopThat = 'Stop that!';
-                    window.showInformationMessage('A blank line has been added at the end of your file!', revertButton, stopThat).then(value => {
-                        if (value === revertButton) {
-                            checker.revert(editor, checker, false);
-                        } else if (value === stopThat) {
-                            checker.revert(editor, checker, true);
-                        }
-                    });
+                    let alertFlag = workspace.getConfiguration("blankLine").get('showMessage');
+                    if (alertFlag) {
+                        var revertButton = 'Revert!';
+                        var stopThat = 'Stop that!';
+                        window.showInformationMessage('A blank line has been added at the end of your file!', revertButton, stopThat).then(value => {
+                            if (value === revertButton) {
+                                checker.revert(editor, checker, false);
+                            } else if (value === stopThat) {
+                                checker.revert(editor, checker, true);
+                            }
+                        });
+                    }
                 })
             }
         } else {
