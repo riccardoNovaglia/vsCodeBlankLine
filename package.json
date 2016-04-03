@@ -1,54 +1,56 @@
 {
-    "name": "missinglineendoffile",
-    "displayName": "Blank Line at the End of File",
-    "description": "This extension will add a blank line at the end of your files when you save them!",
-    "version": "0.1.2",
-    "publisher": "riccardoNovaglia",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/riccardoNovaglia/vsCodeBlankLine.git"
-    },
-    "galleryBanner": {
-        "color": "#80b3ff"
-    },
-    "icon": "images/BlankLineIcon.png",
-    "engines": {
-        "vscode": "^0.10.1"
-    },
-    "categories": [
-        "Linters",
-        "Other"
+  "name": "missinglineendoffile",
+  "displayName": "Blank Line at the End of File",
+  "description": "This extension will add a blank line at the end of your files when you save them!",
+  "version": "0.1.2",
+  "publisher": "riccardoNovaglia",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riccardoNovaglia/vsCodeBlankLine.git"
+  },
+  "galleryBanner": {
+    "color": "#80b3ff"
+  },
+  "icon": "images/BlankLineIcon.png",
+  "engines": {
+    "vscode": "^0.10.1"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.checkBlankLine",
+    "onCommand:workbench.action.files.save"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.checkBlankLine",
+        "title": "Check for Blank line at End of File"
+      }
     ],
-    "activationEvents": [
-        "onCommand:extension.checkBlankLine",
-        "onCommand:workbench.action.files.save"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.checkBlankLine",
-                "title": "Check for Blank line at End of File"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Flag to indicate whether to display an message when a line is added to your file",
-            "properties": {
-                "blankLine.showMessage": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Controls whether a message is displayed each time a line is added to your file"
-                }
-            }
+    "configuration": {
+      "type": "object",
+      "title": "Flag to indicate whether to display an message when a line is added to your file",
+      "properties": {
+        "blankLine.showMessage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether a message is displayed each time a line is added to your file"
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
-    },
-    "devDependencies": {
-        "typescript": "^1.6.2",
-        "vscode": "0.10.x"
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+  },
+  "devDependencies": {
+    "sinon": "^1.17.3",
+    "typescript": "^1.6.2",
+    "vscode": "0.10.x"
+  },
+  "dependencies": {}
 }
