@@ -1,4 +1,5 @@
 import VSCodeAdapter from "./VSCodeAdapter";
+import { EOL } from 'os'
 
 export default class BlankLineChecker {
 
@@ -20,15 +21,22 @@ export default class BlankLineChecker {
 
     private analyseDocContent() {
         let checker = this;
-        if (this.vsAdapter.docLinesCount() > 1 && !this.vsAdapter.lastDocumentLineIsEmpty()) {
-            this.vsAdapter.addBlankLineAndSaveFile();
-            if (this.shouldDisplayRevertMessage) {
-                this.displayRevertMessage();
-            }
+        if (this.vsAdapter.docLineCount() > 0 && !this.vsAdapter.lastDocumentLineIsEmpty()) {
+            this.vsAdapter.appendToFile(EOL, (fileWasSaved) => {
+                if (fileWasSaved) {
+                    this.displayRevertMessage();
+                } else {
+                    // todo
+                }
+            });
+
         }
     }
 
     private displayRevertMessage() {
+        if (!this.shouldDisplayRevertMessage) {
+            return;
+        }
         this.vsAdapter.displayRevertMessage(
             (userPressedStopThat) => {
                 if (userPressedStopThat) {
