@@ -2,6 +2,7 @@ import { window, commands, workspace, Disposable, ExtensionContext, Range, Posit
 import { EOL } from 'os';
 import vscode = require('vscode');
 import BlankLineChecker from './BlankLineChecker';
+import VSCodeAdapter from './VSCodeAdapter';
 
 export function activate(context: ExtensionContext) {
 
@@ -9,11 +10,10 @@ export function activate(context: ExtensionContext) {
     let controller = new BlankCheckerController(blankLineChecker);
 
     var disposable = commands.registerCommand('extension.checkBlankLine', () => {
-        blankLineChecker.addBlankLineIfNeeded();
+        blankLineChecker.addBlankLineIfNeeded(new VSCodeAdapter());
     });
 
     context.subscriptions.push(controller);
-    context.subscriptions.push(blankLineChecker);
     context.subscriptions.push(disposable);
 }
 
@@ -32,6 +32,6 @@ class BlankCheckerController {
     }
 
     private _onEvent() {
-        this.blankChecker.addBlankLineIfNeeded();
+        this.blankChecker.addBlankLineIfNeeded(new VSCodeAdapter());
     }
 }

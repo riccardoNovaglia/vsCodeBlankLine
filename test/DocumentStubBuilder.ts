@@ -1,14 +1,14 @@
 import VSCodeAdapter from '../src/VSCodeAdapter'
 
 export default class DocumentStubBuilder {
-    private sandbox;
+    private stubVSAdapter;
 
     private uri = 'any/path';
     private blankLine = true;
     private lineCount = 123;
 
-    constructor(sandbox) {
-        this.sandbox = sandbox;
+    constructor(stubVSAdapter) {
+        this.stubVSAdapter = stubVSAdapter;
     }
 
     public withUri(uri) {
@@ -27,8 +27,8 @@ export default class DocumentStubBuilder {
     }
 
     public build() {
-        this.sandbox.stub(VSCodeAdapter.prototype, 'docURI').returns(this.uri);
-        this.sandbox.stub(VSCodeAdapter.prototype, 'lastDocumentLineIsEmpty').returns(this.blankLine);
-        this.sandbox.stub(VSCodeAdapter.prototype, 'docLineCount').returns(this.lineCount);
+        this.stubVSAdapter.docURI = () => { return this.uri };
+        this.stubVSAdapter.lastDocumentLineIsEmpty = () => { return this.blankLine };
+        this.stubVSAdapter.docLineCount = () => { return this.lineCount };
     }
 }

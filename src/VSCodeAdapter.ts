@@ -5,10 +5,9 @@ export default class VSCodeAdapter {
     private editor: TextEditor;
     private doc: TextDocument;
     private alertFlag;
-    private lastLineIndex = this.doc ? this.doc.lineCount - 1 : 0;
 
     private revertButtonLabel = 'Revert!';
-    private stopThatButtonLabel = 'Stop that!';
+    private notThisFileButtonLabel = 'Not this file!';
     private revertMessageLabel = 'A blank line has been added at the end of your file!';
 
     public constructor() {
@@ -26,7 +25,7 @@ export default class VSCodeAdapter {
     }
 
     public lastDocumentLineIsEmpty(): boolean {
-        return this.lineAt(this.lastLineIndex).isEmptyOrWhitespace;
+        return this.lineAt(this.lastLineIndex()).isEmptyOrWhitespace;
     }
 
     public docLineCount(): number {
@@ -51,32 +50,36 @@ export default class VSCodeAdapter {
 
     public displayRevertMessage(callback) {
         window
-            .showInformationMessage(this.revertMessageLabel, this.revertButtonLabel, this.stopThatButtonLabel)
+            .showInformationMessage(this.revertMessageLabel, this.revertButtonLabel, this.notThisFileButtonLabel)
             .then(buttonPressedValue => {
-                callback(buttonPressedValue === this.stopThatButtonLabel);
+                callback(buttonPressedValue === this.notThisFileButtonLabel);
             });
     }
 
-    public revert() {
+    public displayFileCouldNotBeSavedError() {
+        window.showErrorMessage("Error: file could not be saved!");
+    }
+
+    public revert(callback) {
         let adapter = this;
         this.editor.edit(function(editbuilder) {
             var deleteRange = adapter.lastLineRange();
             editbuilder.delete(deleteRange);
-            // adapter.saveFile();
+            adapter.saveFile(callback);
         });
     }
 
     private saveFile(callback) {
-        this.doc.save().then(
-            function(wasSaved) {
-                callback(wasSaved);
-            }
-        );
-
+        setTimeout(() => {
+            this.doc.save().then(
+                (wasSaved) => {
+                    callback(wasSaved);
+                });
+        }, 100);
     }
 
     private lastTextLine(): string {
-        return this.lineAt(this.lastLineIndex).text;
+        return this.lineAt(this.lastLineIndex()).text;
     }
 
     private lineAt(index): TextLine {
@@ -88,10 +91,12 @@ export default class VSCodeAdapter {
         return new Position(this.doc.lineCount, this.lastTextLine().length);
     }
 
-
+    private lastLineIndex(): number {
+        return this.doc.lineCount - 1;
+    }
 
     private lastLineRange(): Range {
-        var penultimateLineIndex = this.lastLineIndex - 2;
+        var penultimateLineIndex = this.lastLineIndex() - 1;
         var secondlastLine = this.doc.lineAt(penultimateLineIndex);
         var secondLastLineText = secondlastLine.text;
         var penultimateLinePosition = new Position(penultimateLineIndex, secondLastLineText.length);

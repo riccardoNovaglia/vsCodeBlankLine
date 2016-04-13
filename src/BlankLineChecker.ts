@@ -3,34 +3,41 @@ import { EOL } from 'os'
 
 export default class BlankLineChecker {
 
-    private stopThat = "";
-    private skipOne = false;
+    private fileNameToBeExcluded = "";
+    private revertButtonWasHit = false;
 
-    private vsAdapter = new VSCodeAdapter();
+    private vsAdapter;
     private shouldDisplayRevertMessage = true;
 
-    public addBlankLineIfNeeded(): void {
+    public addBlankLineIfNeeded(vsAdapter: VSCodeAdapter): void {
+        this.vsAdapter = vsAdapter;
         if (this.shouldNotSkipDoc()) {
             this.analyseDocContent();
         } else {
-            if (this.skipOne) {
-                this.skipOne = false;
+            if (this.revertButtonWasHit) {
+                this.revertButtonWasHit = false;
             }
         }
     }
 
+    private shouldNotSkipDoc() {
+        return this.vsAdapter.docURI() !== this.fileNameToBeExcluded && !this.revertButtonWasHit;
+    }
+
     private analyseDocContent() {
-        let checker = this;
-        if (this.vsAdapter.docLineCount() > 0 && !this.vsAdapter.lastDocumentLineIsEmpty()) {
+        if (this.shouldAddBlankLine()) {
             this.vsAdapter.appendToFile(EOL, (fileWasSaved) => {
                 if (fileWasSaved) {
                     this.displayRevertMessage();
                 } else {
-                    // todo
+                    this.vsAdapter.displayFileCouldNotBeSavedError();
                 }
             });
-
         }
+    }
+
+    private shouldAddBlankLine() {
+        return this.vsAdapter.docLineCount() > 0 && !this.vsAdapter.lastDocumentLineIsEmpty();
     }
 
     private displayRevertMessage() {
@@ -38,18 +45,26 @@ export default class BlankLineChecker {
             return;
         }
         this.vsAdapter.displayRevertMessage(
-            (userPressedStopThat) => {
-                if (userPressedStopThat) {
-                    this.stopThat = this.vsAdapter.docURI();
-                } else {
-                    this.skipOne = true;
-                }
-                this.vsAdapter.revert();
+            (userPressedNotThisFile) => {
+                this.markDocumentToBeSkipped(userPressedNotThisFile);
+                this.revertChange();
             });
     }
 
-    private shouldNotSkipDoc() {
-        return this.vsAdapter.docURI() !== this.stopThat && !this.skipOne;
+    private markDocumentToBeSkipped(userPressedNotThisFile) {
+        if (userPressedNotThisFile) {
+            this.fileNameToBeExcluded = this.vsAdapter.docURI();
+        } else {
+            this.revertButtonWasHit = true;
+        }
+    }
+
+    private revertChange() {
+        this.vsAdapter.revert((wasSaved) => {
+            if (!wasSaved) {
+                this.vsAdapter.displayFileCouldNotBeSavedError();
+            }
+        });
     }
 
     dispose() {
