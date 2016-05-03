@@ -27,6 +27,7 @@ suite("Blank Line Extension Tests", () => {
          };
         addLineSpy = sinon.spy(stubVSAdapter, 'appendToFile');
         revertSpy = sinon.spy(stubVSAdapter, 'revert');
+        stubVSAdapter.alertConfigValue = () => { return true };
     });
     teardown(() => {
         sandbox.restore();
@@ -106,6 +107,16 @@ suite("Blank Line Extension Tests", () => {
         addBlankLinesCallCountIs(2);
     });
 
+    test("Does not revert the file if the Close button is hit", () => {
+        theUserWillHitTheCloseButton();
+        someDocument().withoutBlankLine().build();
+
+        theExtensionIsActivated();
+
+        addBlankLinesCallCountIs(1);
+        revertCallCountIs(0);
+    });
+
     test("Displays an error message if the file could not be saved", () => {
         let errorMessageSpy = aSpyForDisplayErrorMessage();
         savefileWillFail();
@@ -113,7 +124,26 @@ suite("Blank Line Extension Tests", () => {
 
         theExtensionIsActivated();
 
-        assert.equal(errorMessageSpy.callCount, 1)
+        assert.equal(errorMessageSpy.callCount, 1);
+    });
+
+     test("Should display the revert dialog if the config is set to true", () => {
+        let displayDialogSpy = aSpyForDisplayRevertDialog()
+        someDocument().withoutBlankLine().build();
+
+        theExtensionIsActivated();
+
+        assert.equal(displayDialogSpy.callCount, 1);
+    });
+
+    test("Should not display the revert dialog if the config sets it to false", () => {
+        let displayDialogSpy = aSpyForDisplayRevertDialog()
+        theConfigSaysNotToDisplayTheDialog();
+        someDocument().withoutBlankLine().build();
+
+        theExtensionIsActivated();
+
+        assert.equal(displayDialogSpy.callCount, 0);
     });
 });
 
@@ -135,14 +165,20 @@ function revertCallCountIs(times) {
 }
 
 function theUserWillHitTheRevertButton() {
-    stubVSAdapter.displayRevertMessage = (notThisFilePressed) => {
-        notThisFilePressed(false);
+    stubVSAdapter.displayRevertMessage = (userInput) => {
+        userInput({isClose: false, isRevert: true, isNotThisFile: false});
     };
 }
 
 function theUserWillHitTheNotThisFileButton() {
-    stubVSAdapter.displayRevertMessage = (notThisFilePressed) => {
-        notThisFilePressed(true);
+    stubVSAdapter.displayRevertMessage = (userInput) => {
+        userInput({isClose: false, isRevert: false, isNotThisFile: true});
+    };
+}
+
+function theUserWillHitTheCloseButton() {
+    stubVSAdapter.displayRevertMessage = (userInput) => {
+        userInput({isClose: true, isRevert: false, isNotThisFile: false});
     };
 }
 
@@ -155,4 +191,13 @@ function savefileWillFail() {
 function aSpyForDisplayErrorMessage() {
     stubVSAdapter.displayFileCouldNotBeSavedError = () => { }
     return sinon.spy(stubVSAdapter, 'displayFileCouldNotBeSavedError');
+}
+
+function aSpyForDisplayRevertDialog() {
+    stubVSAdapter.displayRevertMessage = () => { }
+    return sinon.spy(stubVSAdapter, 'displayRevertMessage');
+}
+
+function theConfigSaysNotToDisplayTheDialog() {
+    stubVSAdapter.alertConfigValue = () => { return false };
 }
