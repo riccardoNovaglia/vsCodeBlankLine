@@ -52,9 +52,9 @@ export default class VSCodeAdapter {
         window
             .showInformationMessage(this.revertMessageLabel, this.revertButtonLabel, this.notThisFileButtonLabel)
             .then(buttonPressedValue => {
-                hitClose = buttonPressedValue === undefined;
-                hitRevert = buttonPressedValue === this.revertButtonLabel;
-                hitNotThisFile = buttonPressedValue === this.notThisFileButtonLabel;
+                let hitClose = buttonPressedValue === undefined;
+                let hitRevert = buttonPressedValue === this.revertButtonLabel;
+                let hitNotThisFile = buttonPressedValue === this.notThisFileButtonLabel;
                 callback({isClose: hitClose, isRevert: hitRevert, isNotThisFile: hitNotThisFile});
             });
     }
