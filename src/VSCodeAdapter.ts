@@ -73,12 +73,14 @@ export default class VSCodeAdapter {
     }
 
     private saveFile(callback) {
-        setTimeout(() => {
+        if (this.doc.isDirty) {
             this.doc.save().then(
                 (wasSaved) => {
                     callback(wasSaved);
                 });
-        }, 100);
+        } else {
+            callback(true);
+        }
     }
 
     private lastTextLine(): string {
