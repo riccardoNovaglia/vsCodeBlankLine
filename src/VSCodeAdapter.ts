@@ -73,11 +73,17 @@ export default class VSCodeAdapter {
     }
 
     private saveFile(callback) {
+        // This timeout is a hack to ensure that the file edit is complete
+        // before saving the file. Removing it would cause VSCode to not save the file after appending the blank line
         setTimeout(() => {
-            this.doc.save().then(
-                (wasSaved) => {
-                    callback(wasSaved);
-                });
+            if (this.doc.isDirty) {
+                this.doc.save().then(
+                    (wasSaved) => {
+                        callback(wasSaved);
+                    });
+            } else {
+                callback(true);
+            }
         }, 100);
     }
 
