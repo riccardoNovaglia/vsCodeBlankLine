@@ -1,16 +1,16 @@
-import { window, commands, workspace, Disposable, ExtensionContext, Range, Position } from 'vscode';
-import { EOL } from 'os';
+import {commands, workspace, Disposable, ExtensionContext} from "vscode";
+import BlankLineChecker from "./BlankLineChecker";
+import VSCodeAdapter from "./VSCodeAdapter";
 import vscode = require('vscode');
-import BlankLineChecker from './BlankLineChecker';
-import VSCodeAdapter from './VSCodeAdapter';
 
 export function activate(context: ExtensionContext) {
 
+    let vsCodeAdapter = new VSCodeAdapter();
     let blankLineChecker = new BlankLineChecker();
-    let controller = new BlankCheckerController(blankLineChecker);
+    let controller = new BlankCheckerController(blankLineChecker, vsCodeAdapter);
 
-    var disposable = commands.registerCommand('extension.checkBlankLine', () => {
-        blankLineChecker.addBlankLineIfNeeded(new VSCodeAdapter());
+    let disposable = commands.registerCommand('extension.checkBlankLine', () => {
+        blankLineChecker.addBlankLineIfNeeded(vsCodeAdapter);
     });
 
     context.subscriptions.push(controller);
@@ -20,9 +20,11 @@ export function activate(context: ExtensionContext) {
 class BlankCheckerController {
 
     private blankChecker: BlankLineChecker;
+    private vsCodeAdapter: VSCodeAdapter;
 
-    constructor(blankChecker: BlankLineChecker) {
+    constructor(blankChecker: BlankLineChecker, vsCodeAdapter: VSCodeAdapter) {
         this.blankChecker = blankChecker;
+        this.vsCodeAdapter = vsCodeAdapter;
 
         let subscriptions: Disposable[] = [];
         workspace.onDidSaveTextDocument(this._onEvent, this, subscriptions);
@@ -32,6 +34,6 @@ class BlankCheckerController {
     }
 
     private _onEvent() {
-        this.blankChecker.addBlankLineIfNeeded(new VSCodeAdapter());
+        this.blankChecker.addBlankLineIfNeeded(this.vsCodeAdapter);
     }
 }

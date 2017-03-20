@@ -1,9 +1,9 @@
-import VSCodeAdapter from '../src/VSCodeAdapter'
+import VSCodeAdapter from "../src/VSCodeAdapter";
 
-export default class DocumentStubBuilder {
+class DocumentStubBuilder {
     private stubVSAdapter;
 
-    private uri = 'any/path';
+    private uri = 'any/path.txt';
     private blankLine = true;
     private lineCount = 123;
 
@@ -27,8 +27,18 @@ export default class DocumentStubBuilder {
     }
 
     public build() {
-        this.stubVSAdapter.docURI = () => { return this.uri };
-        this.stubVSAdapter.lastDocumentLineIsEmpty = () => { return this.blankLine };
-        this.stubVSAdapter.docLineCount = () => { return this.lineCount };
+        this.stubVSAdapter.docURI = () => {
+            return this.uri
+        };
+        this.stubVSAdapter.lastDocumentLineIsEmpty = () => {
+            return this.blankLine
+        };
+        this.stubVSAdapter.docLineCount = () => {
+            return this.lineCount
+        };
     }
+}
+
+export function SomeDocument(stubVsAdapter: VSCodeAdapter) {
+    return new DocumentStubBuilder(stubVsAdapter);
 }

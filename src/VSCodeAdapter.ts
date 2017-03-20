@@ -1,27 +1,21 @@
-import { window, commands, workspace, Disposable, ExtensionContext, Range, Position, TextDocument, TextEditor, TextLine } from 'vscode';
+import {window, workspace, Range, Position, TextDocument, TextEditor, TextLine} from "vscode";
 
 export default class VSCodeAdapter {
 
     private editor: TextEditor;
     private doc: TextDocument;
-    private alertFlag;
+    private alertFlag: boolean;
+    private fileTypesToExclude: Set<string>;
 
-    private revertButtonLabel = 'Revert!';
-    private notThisFileButtonLabel = 'Not this file!';
-    private revertMessageLabel = 'A blank line has been added at the end of your file!';
+    private revertButtonLabel = 'Revert';
+    private notThisFileButtonLabel = 'Exclude files with this type';
+    private revertMessageLabel = 'A blank line has been added at the end of your file';
 
     public constructor() {
-        this.init();
-    }
-
-    private init() {
-        this.alertFlag = workspace.getConfiguration("blankLine").get('showMessage');
+        this.alertFlag = workspace.getConfiguration("blankLine").get<boolean>('showMessage');
+        this.fileTypesToExclude = new Set(workspace.getConfiguration("blankLine").get<Array<string>>('fileTypesToExclude', []));
         this.editor = window.activeTextEditor;
         this.doc = this.editor.document;
-    }
-
-    public textFromLineAt(linePosition) {
-        return this.lineAt(linePosition).text;
     }
 
     public lastDocumentLineIsEmpty(): boolean {
@@ -36,13 +30,17 @@ export default class VSCodeAdapter {
         return this.doc.uri.toString();
     }
 
-    public alertConfigValue(): boolean {
+    public getAlertConfigValue(): boolean {
         return this.alertFlag;
+    }
+
+    public getFileTypesToExclude(): Set<string> {
+        return this.fileTypesToExclude;
     }
 
     public appendToFile(EOL, callback) {
         let adapter = this;
-        this.editor.edit(function(editbuilder) {
+        this.editor.edit(function (editbuilder) {
             editbuilder.insert(adapter.endOfFilePosition(), EOL);
             adapter.saveFile(callback);
         })
@@ -65,8 +63,8 @@ export default class VSCodeAdapter {
 
     public revert(callback) {
         let adapter = this;
-        this.editor.edit(function(editbuilder) {
-            var deleteRange = adapter.lastLineRange();
+        this.editor.edit(function (editbuilder) {
+            let deleteRange = adapter.lastLineRange();
             editbuilder.delete(deleteRange);
             adapter.saveFile(callback);
         });
@@ -105,10 +103,9 @@ export default class VSCodeAdapter {
     }
 
     private lastLineRange(): Range {
-        var penultimateLineIndex = this.lastLineIndex() - 1;
-        var secondlastLine = this.doc.lineAt(penultimateLineIndex);
-        var secondLastLineText = secondlastLine.text;
-        var penultimateLinePosition = new Position(penultimateLineIndex, secondLastLineText.length);
+        let penultimateLineIndex = this.lastLineIndex() - 1;
+        let penultimateLineText = this.doc.lineAt(penultimateLineIndex).text;
+        let penultimateLinePosition = new Position(penultimateLineIndex, penultimateLineText.length);
 
         return new Range(penultimateLinePosition, this.endOfFilePosition());
     }

@@ -1,15 +1,16 @@
 import VSCodeAdapter from "./VSCodeAdapter";
-import { EOL } from 'os'
+import {EOL} from "os";
 
 export default class BlankLineChecker {
 
-    private fileNameToBeExcluded = "";
+    private filesExtensionsToIgnore: Set<String>;
     private revertButtonWasHit = false;
 
-    private vsAdapter;
+    private vsAdapter: VSCodeAdapter;
 
     public addBlankLineIfNeeded(vsAdapter: VSCodeAdapter): void {
         this.vsAdapter = vsAdapter;
+        this.filesExtensionsToIgnore = vsAdapter.getFileTypesToExclude();
         if (this.shouldNotSkipDoc()) {
             this.analyseDocContent();
         } else {
@@ -20,7 +21,11 @@ export default class BlankLineChecker {
     }
 
     private shouldNotSkipDoc() {
-        return this.vsAdapter.docURI() !== this.fileNameToBeExcluded && !this.revertButtonWasHit;
+        return this.fileExtensionIsNotExcluded() && !this.revertButtonWasHit;
+    }
+
+    private fileExtensionIsNotExcluded() {
+        return !this.filesExtensionsToIgnore.has(this.getFileExtension(this.vsAdapter.docURI()));
     }
 
     private analyseDocContent() {
@@ -40,7 +45,7 @@ export default class BlankLineChecker {
     }
 
     private displayRevertMessage() {
-        if (!this.vsAdapter.alertConfigValue()) {
+        if (!this.vsAdapter.getAlertConfigValue()) {
             return;
         }
         this.vsAdapter.displayRevertMessage(
@@ -54,7 +59,7 @@ export default class BlankLineChecker {
 
     private markDocumentToBeSkipped(userInput) {
         if (userInput.isNotThisFile) {
-            this.fileNameToBeExcluded = this.vsAdapter.docURI();
+            this.filesExtensionsToIgnore.add(this.getFileExtension(this.vsAdapter.docURI()))
         } else if (userInput.isRevert) {
             this.revertButtonWasHit = true;
         }
@@ -66,6 +71,11 @@ export default class BlankLineChecker {
                 this.vsAdapter.displayFileCouldNotBeSavedError();
             }
         });
+    }
+
+    private getFileExtension(filePath: String) {
+        let lastDot = filePath.lastIndexOf(".");
+        return lastDot != -1 ? filePath.substr(lastDot) : filePath;
     }
 
     dispose() {
