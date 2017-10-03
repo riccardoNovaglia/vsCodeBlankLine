@@ -11,6 +11,7 @@ import DocumentStubBuilder from  './DocumentStubBuilder'
 let sandbox;
 let checker;
 let addLineSpy;
+let removeLineSpy;
 let revertSpy;
 let stubVSAdapter;
 
@@ -20,14 +21,17 @@ suite("Blank Line Extension Tests", () => {
         sandbox = sinon.sandbox.create();
         stubVSAdapter = sinon.createStubInstance(VSCodeAdapter);
         checker = new BlankLineChecker();
-        stubVSAdapter.appendToFile = (char, callback) => { callback(true); };
-        stubVSAdapter.revert = (fileWasSaved) => {
+        stubVSAdapter.appendToFile = (char, callback) => { callback(true) };
+        stubVSAdapter.revert = (EOL, lastOperation, fileWasSaved) => {
             fileWasSaved(true);
             theExtensionIsActivated();
-         };
+        };
+        stubVSAdapter.removeBlankLines = (count, callback) => { callback(true) };
         addLineSpy = sinon.spy(stubVSAdapter, 'appendToFile');
+        removeLineSpy = sinon.spy(stubVSAdapter, 'removeBlankLines');
         revertSpy = sinon.spy(stubVSAdapter, 'revert');
         stubVSAdapter.alertConfigValue = () => { return true };
+        stubVSAdapter.removeExtraLinesConfigValue = () => { return true };
     });
     teardown(() => {
         sandbox.restore();
@@ -41,12 +45,13 @@ suite("Blank Line Extension Tests", () => {
         addBlankLinesCallCountIs(1);
     });
 
-    test("Does not append to a file that has a blank line at its end", () => {
-        someDocument().build();
+    test("Removes extra blank lines", () => {
+        someDocument().withFinalBlankLines(3).build();
 
         theExtensionIsActivated();
 
-        addBlankLinesCallCountIs(0);
+        removeBlankLinesCallCountIs(1);
+        removeBlankLinesCalledWith(2);
     });
 
     test("Does not append to a file that is blank", () => {
@@ -73,6 +78,28 @@ suite("Blank Line Extension Tests", () => {
 
         addBlankLinesCallCountIs(1);
         revertCallCountIs(1);
+        revertCalledWithLastOperation({type: "add", count: 1});
+    });
+
+    test("Returns removed blank lines if revert button was hit", () => {
+        someDocument().withFinalBlankLines(3).build();
+        theUserWillHitTheRevertButton();
+
+        theExtensionIsActivated();
+
+        removeBlankLinesCallCountIs(1);
+        removeBlankLinesCalledWith(2);
+        revertCallCountIs(1);
+        revertCalledWithLastOperation({type: "remove", count: 2});
+    });
+
+    test("Does not remove blank lines if config says not to", () => {
+        someDocument().withFinalBlankLines(3).build();
+        theConfigSaysNotToRemoveLastEmptyLines();
+
+        theExtensionIsActivated();
+
+        removeBlankLinesCallCountIs(0);
     });
 
     test("Appends again after the revert button was hit", () => {
@@ -160,8 +187,20 @@ function addBlankLinesCallCountIs(times) {
     assert.equal(addLineSpy.callCount, times);
 }
 
+function removeBlankLinesCallCountIs(times) {
+    assert.equal(removeLineSpy.callCount, times);
+}
+
+function removeBlankLinesCalledWith(count) {
+    assert(removeLineSpy.calledWith(count));
+}
+
 function revertCallCountIs(times) {
     assert.equal(revertSpy.callCount, times);
+}
+
+function revertCalledWithLastOperation(lastOperation) {
+    assert(revertSpy.calledWith(sinon.match.any, sinon.match(lastOperation), sinon.match.any));
 }
 
 function theUserWillHitTheRevertButton() {
@@ -200,4 +239,8 @@ function aSpyForDisplayRevertDialog() {
 
 function theConfigSaysNotToDisplayTheDialog() {
     stubVSAdapter.alertConfigValue = () => { return false };
+}
+
+function theConfigSaysNotToRemoveLastEmptyLines() {
+    stubVSAdapter.removeExtraLinesConfigValue = () => { return false };
 }
