@@ -5,6 +5,7 @@ export default class VSCodeAdapter {
     private editor: TextEditor;
     private doc: TextDocument;
     private alertFlag;
+    private removeExtraLines;
 
     private revertButtonLabel = 'Revert!';
     private notThisFileButtonLabel = 'Not this file!';
@@ -16,11 +17,12 @@ export default class VSCodeAdapter {
 
     private init() {
         this.alertFlag = workspace.getConfiguration("blankLine").get('showMessage');
+        this.removeExtraLines = workspace.getConfiguration("blankLine").get('removeExtraLines');
         this.editor = window.activeTextEditor;
         this.doc = this.editor.document;
     }
 
-    public textFromLineAt(linePosition) {
+    public textFromLineAt(linePosition): string {
         return this.lineAt(linePosition).text;
     }
 
@@ -40,10 +42,30 @@ export default class VSCodeAdapter {
         return this.alertFlag;
     }
 
+    public removeExtraLinesConfigValue(): boolean {
+        return this.removeExtraLines;
+    }
+
     public appendToFile(EOL, callback) {
         let adapter = this;
         this.editor.edit(function(editbuilder) {
             editbuilder.insert(adapter.endOfFilePosition(), EOL);
+            adapter.saveFile(callback);
+        })
+    }
+
+    public lastEmptyLinesCount(EOL): number {
+        let text = this.doc.getText();
+        const removeEOLPatter = `${EOL}+$`;
+
+        return text.length - text.replace(new RegExp(removeEOLPatter), '').length;
+    }
+
+    public removeBlankLines(count, callback) {
+        let adapter = this;
+        this.editor.edit(function(editbuilder) {
+            var deleteRange = adapter.lastLinesRange(count);
+            editbuilder.delete(deleteRange);
             adapter.saveFile(callback);
         })
     }
@@ -63,11 +85,20 @@ export default class VSCodeAdapter {
         window.showErrorMessage("Error: file could not be saved!");
     }
 
-    public revert(callback) {
+    public revert(EOL, lastOperation, callback) {
         let adapter = this;
         this.editor.edit(function(editbuilder) {
-            var deleteRange = adapter.lastLineRange();
-            editbuilder.delete(deleteRange);
+            const {type, count} = lastOperation;
+
+            switch (type) {
+                case "add":
+                    var deleteRange = adapter.lastLinesRange(count);
+                    editbuilder.delete(deleteRange);
+                break;
+                case "remove":
+                    editbuilder.insert(adapter.endOfFilePosition(), EOL.repeat(count));
+                break;
+            }
             adapter.saveFile(callback);
         });
     }
@@ -104,12 +135,12 @@ export default class VSCodeAdapter {
         return this.doc.lineCount - 1;
     }
 
-    private lastLineRange(): Range {
-        var penultimateLineIndex = this.lastLineIndex() - 1;
-        var secondlastLine = this.doc.lineAt(penultimateLineIndex);
-        var secondLastLineText = secondlastLine.text;
-        var penultimateLinePosition = new Position(penultimateLineIndex, secondLastLineText.length);
+    private lastLinesRange(count): Range {
+        var lastFilledLineIndex = this.lastLineIndex() - count;
+        var lastFilledLine = this.doc.lineAt(lastFilledLineIndex);
+        var lastFilledLineText = lastFilledLine.text;
+        var lastFilledLinePosition = new Position(lastFilledLineIndex, lastFilledLineText.length);
 
-        return new Range(penultimateLinePosition, this.endOfFilePosition());
+        return new Range(lastFilledLinePosition, this.endOfFilePosition());
     }
 }

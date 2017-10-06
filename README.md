@@ -15,6 +15,9 @@ to
 
 `"blankLine.showMessage": false`
 
+`//-------- Flag to indicate whether to remove extra empty lines beside one --------`
+	`"blankLine.removeExtraLines": true(default value)`
+
 I kept this extension as easy as it can be. All its code can be found here: https://github.com/riccardoNovaglia/vsCodeBlankLine.git
 I would say that if you're interested in making your own extension, this is a nice little example!
 

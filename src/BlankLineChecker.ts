@@ -5,6 +5,7 @@ export default class BlankLineChecker {
 
     private fileNameToBeExcluded = "";
     private revertButtonWasHit = false;
+    private lastOperation;
 
     private vsAdapter;
 
@@ -24,14 +25,33 @@ export default class BlankLineChecker {
     }
 
     private analyseDocContent() {
+        let lastOperation;
+        const saveCallback = (fileWasSaved) => {
+            if (fileWasSaved) {
+                this.lastOperation = lastOperation;
+                this.displayRevertMessage();
+            } else {
+                this.vsAdapter.displayFileCouldNotBeSavedError();
+            }
+        };
+
         if (this.shouldAddBlankLine()) {
-            this.vsAdapter.appendToFile(EOL, (fileWasSaved) => {
-                if (fileWasSaved) {
-                    this.displayRevertMessage();
-                } else {
-                    this.vsAdapter.displayFileCouldNotBeSavedError();
-                }
-            });
+            lastOperation = {
+                type: "add",
+                count: 1
+            };
+            this.vsAdapter.appendToFile(EOL, saveCallback);
+            return;
+        }
+
+        const count = this.vsAdapter.lastEmptyLinesCount(EOL);
+        if (count > 1 && this.vsAdapter.removeExtraLinesConfigValue()) {
+            lastOperation = {
+                type: "remove",
+                count: count - 1
+            };
+            this.vsAdapter.removeBlankLines(count - 1, saveCallback);
+            return;
         }
     }
 
@@ -61,7 +81,7 @@ export default class BlankLineChecker {
     }
 
     private revertChange() {
-        this.vsAdapter.revert((wasSaved) => {
+        this.vsAdapter.revert(EOL, this.lastOperation, (wasSaved) => {
             if (!wasSaved) {
                 this.vsAdapter.displayFileCouldNotBeSavedError();
             }

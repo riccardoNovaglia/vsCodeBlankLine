@@ -39,6 +39,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether a message is displayed each time a line is added to your file"
+        },
+        "blankLine.removeExtraLines": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether to remove extra blank lines or not"
         }
       }
     }
