@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 
 import BlankLineChecker from '../src/BlankLineChecker';
 import VSCodeAdapter from '../src/VSCodeAdapter'
-import DocumentStubBuilder from  './DocumentStubBuilder'
+import DocumentStubBuilder from './DocumentStubBuilder'
 
 let sandbox;
 let checker;
@@ -32,6 +32,7 @@ suite("Blank Line Extension Tests", () => {
         revertSpy = sinon.spy(stubVSAdapter, 'revert');
         stubVSAdapter.alertConfigValue = () => { return true };
         stubVSAdapter.removeExtraLinesConfigValue = () => { return true };
+        stubVSAdapter.fileExtensionsToIgnoreConfigValue = () => { return [] };
     });
     teardown(() => {
         sandbox.restore();
@@ -78,7 +79,7 @@ suite("Blank Line Extension Tests", () => {
 
         addBlankLinesCallCountIs(1);
         revertCallCountIs(1);
-        revertCalledWithLastOperation({type: "add", count: 1});
+        revertCalledWithLastOperation({ type: "add", count: 1 });
     });
 
     test("Returns removed blank lines if revert button was hit", () => {
@@ -90,7 +91,7 @@ suite("Blank Line Extension Tests", () => {
         removeBlankLinesCallCountIs(1);
         removeBlankLinesCalledWith(2);
         revertCallCountIs(1);
-        revertCalledWithLastOperation({type: "remove", count: 2});
+        revertCalledWithLastOperation({ type: "remove", count: 2 });
     });
 
     test("Does not remove blank lines if config says not to", () => {
@@ -154,7 +155,7 @@ suite("Blank Line Extension Tests", () => {
         assert.equal(errorMessageSpy.callCount, 1);
     });
 
-     test("Should display the revert dialog if the config is set to true", () => {
+    test("Should display the revert dialog if the config is set to true", () => {
         let displayDialogSpy = aSpyForDisplayRevertDialog()
         someDocument().withoutBlankLine().build();
 
@@ -172,6 +173,33 @@ suite("Blank Line Extension Tests", () => {
 
         assert.equal(displayDialogSpy.callCount, 0);
     });
+
+    test("Should not remove blank lines from files with extensions to be ignored", () => {
+        theConfigSaysToIgoreDotConfFiles([".conf"])
+        someDocument().withoutBlankLine().withUri('another/file.conf').build();
+
+        theExtensionIsActivated();
+
+        addBlankLinesCallCountIs(0);
+    });
+
+    test("Should remove blank lines from files with extensions different from what is to be ignored", () => {
+        theConfigSaysToIgoreDotConfFiles([".conf"])
+        someDocument().withoutBlankLine().withUri('another/file.conf.banana').build();
+
+        theExtensionIsActivated();
+
+        addBlankLinesCallCountIs(1);
+    });
+
+    test("Should not remove blank lines from files with extensions to be ignored - multiple extensions configured", () => {
+        theConfigSaysToIgoreDotConfFiles([".banana", ".conf"])
+        someDocument().withoutBlankLine().withUri('another/file.conf').build();
+
+        theExtensionIsActivated();
+
+        addBlankLinesCallCountIs(0);
+    })
 });
 
 
@@ -205,19 +233,19 @@ function revertCalledWithLastOperation(lastOperation) {
 
 function theUserWillHitTheRevertButton() {
     stubVSAdapter.displayRevertMessage = (userInput) => {
-        userInput({isClose: false, isRevert: true, isNotThisFile: false});
+        userInput({ isClose: false, isRevert: true, isNotThisFile: false });
     };
 }
 
 function theUserWillHitTheNotThisFileButton() {
     stubVSAdapter.displayRevertMessage = (userInput) => {
-        userInput({isClose: false, isRevert: false, isNotThisFile: true});
+        userInput({ isClose: false, isRevert: false, isNotThisFile: true });
     };
 }
 
 function theUserWillHitTheCloseButton() {
     stubVSAdapter.displayRevertMessage = (userInput) => {
-        userInput({isClose: true, isRevert: false, isNotThisFile: false});
+        userInput({ isClose: true, isRevert: false, isNotThisFile: false });
     };
 }
 
@@ -243,4 +271,8 @@ function theConfigSaysNotToDisplayTheDialog() {
 
 function theConfigSaysNotToRemoveLastEmptyLines() {
     stubVSAdapter.removeExtraLinesConfigValue = () => { return false };
+}
+
+function theConfigSaysToIgoreDotConfFiles(toIgnore) {
+    stubVSAdapter.fileExtensionsToIgnoreConfigValue = () => { return toIgnore };
 }

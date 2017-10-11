@@ -2,7 +2,7 @@
   "name": "missinglineendoffile",
   "displayName": "Blank Line at the End of File",
   "description": "This extension will add a blank line at the end of your files when you save them!",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "riccardoNovaglia",
   "repository": {
     "type": "git",
@@ -37,13 +37,22 @@
       "properties": {
         "blankLine.showMessage": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Controls whether a message is displayed each time a line is added to your file"
         },
         "blankLine.removeExtraLines": {
           "type": "boolean",
           "default": true,
           "description": "Controls whether to remove extra blank lines or not"
+        },
+        "blankLine.fileExtensionsToIgnore": {
+          "type": "Array<String>",
+          "default": [
+            ".conf",
+            ".json",
+            ".liquid"
+          ],
+          "description": "List of file extensions to which blank lines should not be added."
         }
       }
     }

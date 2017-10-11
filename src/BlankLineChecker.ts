@@ -7,7 +7,7 @@ export default class BlankLineChecker {
     private revertButtonWasHit = false;
     private lastOperation;
 
-    private vsAdapter;
+    private vsAdapter: VSCodeAdapter;
 
     public addBlankLineIfNeeded(vsAdapter: VSCodeAdapter): void {
         this.vsAdapter = vsAdapter;
@@ -21,7 +21,15 @@ export default class BlankLineChecker {
     }
 
     private shouldNotSkipDoc() {
-        return this.vsAdapter.docURI() !== this.fileNameToBeExcluded && !this.revertButtonWasHit;
+        let filename = this.vsAdapter.docURI();
+        return filename !== this.fileNameToBeExcluded && !this.revertButtonWasHit && this.filenameExtensionShouldNotBeExcluded(filename);
+    }
+
+    private filenameExtensionShouldNotBeExcluded(filename: String): boolean {
+        let toExclude: Array<String> = this.vsAdapter.fileExtensionsToIgnoreConfigValue();
+        let toExcludeWithoutLeadingDot = toExclude.map(conf => conf.substr(1));
+        let fileExtension = filename.split(".").reverse()[0];
+        return toExcludeWithoutLeadingDot.indexOf(fileExtension) === -1;
     }
 
     private analyseDocContent() {

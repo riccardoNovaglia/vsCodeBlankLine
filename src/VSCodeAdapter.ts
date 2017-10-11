@@ -4,8 +4,9 @@ export default class VSCodeAdapter {
 
     private editor: TextEditor;
     private doc: TextDocument;
-    private alertFlag;
-    private removeExtraLines;
+    private alertFlag: boolean;
+    private removeExtraLines: boolean;
+    private fileExtensionsToIgnore: Array<String>;
 
     private revertButtonLabel = 'Revert!';
     private notThisFileButtonLabel = 'Not this file!';
@@ -18,6 +19,7 @@ export default class VSCodeAdapter {
     private init() {
         this.alertFlag = workspace.getConfiguration("blankLine").get('showMessage');
         this.removeExtraLines = workspace.getConfiguration("blankLine").get('removeExtraLines');
+        this.fileExtensionsToIgnore = workspace.getConfiguration("blankLine").get('fileExtensionsToIgnore');
         this.editor = window.activeTextEditor;
         this.doc = this.editor.document;
     }
@@ -46,9 +48,13 @@ export default class VSCodeAdapter {
         return this.removeExtraLines;
     }
 
+    public fileExtensionsToIgnoreConfigValue(): Array<String> {
+        return this.fileExtensionsToIgnore;
+    }
+
     public appendToFile(EOL, callback) {
         let adapter = this;
-        this.editor.edit(function(editbuilder) {
+        this.editor.edit(function (editbuilder) {
             editbuilder.insert(adapter.endOfFilePosition(), EOL);
             adapter.saveFile(callback);
         })
@@ -63,7 +69,7 @@ export default class VSCodeAdapter {
 
     public removeBlankLines(count, callback) {
         let adapter = this;
-        this.editor.edit(function(editbuilder) {
+        this.editor.edit(function (editbuilder) {
             var deleteRange = adapter.lastLinesRange(count);
             editbuilder.delete(deleteRange);
             adapter.saveFile(callback);
@@ -77,7 +83,7 @@ export default class VSCodeAdapter {
                 let hitClose = buttonPressedValue === undefined;
                 let hitRevert = buttonPressedValue === this.revertButtonLabel;
                 let hitNotThisFile = buttonPressedValue === this.notThisFileButtonLabel;
-                callback({isClose: hitClose, isRevert: hitRevert, isNotThisFile: hitNotThisFile});
+                callback({ isClose: hitClose, isRevert: hitRevert, isNotThisFile: hitNotThisFile });
             });
     }
 
@@ -87,17 +93,17 @@ export default class VSCodeAdapter {
 
     public revert(EOL, lastOperation, callback) {
         let adapter = this;
-        this.editor.edit(function(editbuilder) {
-            const {type, count} = lastOperation;
+        this.editor.edit(function (editbuilder) {
+            const { type, count } = lastOperation;
 
             switch (type) {
                 case "add":
                     var deleteRange = adapter.lastLinesRange(count);
                     editbuilder.delete(deleteRange);
-                break;
+                    break;
                 case "remove":
                     editbuilder.insert(adapter.endOfFilePosition(), EOL.repeat(count));
-                break;
+                    break;
             }
             adapter.saveFile(callback);
         });
