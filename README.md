@@ -1,5 +1,20 @@
 ## Don't you hate it when git complains there's no blank line at the end of a file? Me too!!
 
+Looks like VSCode finally caught up with the features in this extension!
+```
+"files.trimTrailingWhitespace": true
+"files.trimFinalNewlines": true
+"files.insertFinalNewline": true
+```
+You can simply use those now. Thanks for using this extension, I hope it was useful!
+
+
+
+---
+
+
+
+
 Whenever you save a file, this extension will automatically add a blank line at its end, if there isn't one already. A message box will let you know when this happens. You can dismiss it with the "Close" button or just hit Esc. If you have multiple blank lines, only one will be kept.
 
 You can hit "Revert!" and the change will be reverted.
