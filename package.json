@@ -2,14 +2,14 @@
   "name": "missinglineendoffile",
   "displayName": "Blank Line at the End of File",
   "description": "This extension will add a blank line at the end of your files when you save them!",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "riccardoNovaglia",
   "repository": {
     "type": "git",
     "url": "https://github.com/riccardoNovaglia/vsCodeBlankLine.git"
   },
   "galleryBanner": {
-    "color": "#80b3ff"
+    "color": "#BED8FF"
   },
   "icon": "images/newLine.png",
   "engines": {

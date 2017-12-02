@@ -37,7 +37,7 @@ export default class VSCodeAdapter {
     }
 
     public alertConfigValue(): boolean {
-        return this.alertFlag !== {};
+        return this.alertFlag;
     }
 
     public appendToFile(EOL, callback) {
@@ -52,7 +52,10 @@ export default class VSCodeAdapter {
         window
             .showInformationMessage(this.revertMessageLabel, this.revertButtonLabel, this.notThisFileButtonLabel)
             .then(buttonPressedValue => {
-                callback(buttonPressedValue === this.notThisFileButtonLabel);
+                hitClose = buttonPressedValue === undefined;
+                hitRevert = buttonPressedValue === this.revertButtonLabel;
+                hitNotThisFile = buttonPressedValue === this.notThisFileButtonLabel;
+                callback({isClose: hitClose, isRevert: hitRevert, isNotThisFile: hitNotThisFile});
             });
     }
 

@@ -7,7 +7,6 @@ export default class BlankLineChecker {
     private revertButtonWasHit = false;
 
     private vsAdapter;
-    private shouldDisplayRevertMessage = true;
 
     public addBlankLineIfNeeded(vsAdapter: VSCodeAdapter): void {
         this.vsAdapter = vsAdapter;
@@ -41,20 +40,22 @@ export default class BlankLineChecker {
     }
 
     private displayRevertMessage() {
-        if (!this.shouldDisplayRevertMessage) {
+        if (!this.vsAdapter.alertConfigValue()) {
             return;
         }
         this.vsAdapter.displayRevertMessage(
-            (userPressedNotThisFile) => {
-                this.markDocumentToBeSkipped(userPressedNotThisFile);
-                this.revertChange();
+            (userInput) => {
+                if (!userInput.isClose) {
+                    this.markDocumentToBeSkipped(userInput);
+                    this.revertChange();
+                }
             });
     }
 
-    private markDocumentToBeSkipped(userPressedNotThisFile) {
-        if (userPressedNotThisFile) {
+    private markDocumentToBeSkipped(userInput) {
+        if (userInput.isNotThisFile) {
             this.fileNameToBeExcluded = this.vsAdapter.docURI();
-        } else {
+        } else if (userInput.isRevert) {
             this.revertButtonWasHit = true;
         }
     }
