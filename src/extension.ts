@@ -1,5 +1,4 @@
 import { window, commands, workspace, Disposable, ExtensionContext, Range, Position } from 'vscode';
-import { EOL } from 'os';
 import vscode = require('vscode');
 import BlankLineChecker from './BlankLineChecker';
 import VSCodeAdapter from './VSCodeAdapter';
